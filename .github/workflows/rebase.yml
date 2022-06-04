@@ -1,0 +1,24 @@
+name: Automatic Rebase
+on:
+  issue_comment:
+    types: [created]
+
+jobs:
+  rebase:
+    runs-on: [ self-hosted, centos ]
+
+    # On pull requests and if the comment starts with `/rebase`
+    if: github.event.issue.pull_request != '' && startsWith(github.event.comment.body, '/rebase')
+
+    steps:
+      - name: Git Checkout the latest code
+        uses: actions/checkout@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0 # otherwise, you will fail to push refs to dest repo
+
+      # If you are using github enterprise, you need to edit the https://github.com/cirrus-actions/rebase/blob/master/entrypoint.sh file.
+      - name: Automatic Rebase
+        uses: cirrus-actions/rebase@1.7
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
